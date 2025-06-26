@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, { useContext, useEffect, useState } from "react";
 import Select, {
   ActionMeta,
   components,
@@ -6,17 +6,17 @@ import Select, {
   OptionProps,
   SingleValue,
   SingleValueProps,
-  StylesConfig
-} from 'react-select';
-import {OpenAIModel} from '../models/model';
-import {ChatService} from '../service/ChatService';
-import {useTranslation} from 'react-i18next';
+  StylesConfig,
+} from "react-select";
+import { OpenAIModel } from "../models/model";
+import { ChatService } from "../service/ChatService";
+import { useTranslation } from "react-i18next";
 import Tooltip from "./Tooltip";
-import {DEFAULT_MODEL} from "../constants/appConstants";
-import './ModelSelect.css'
-import {UserContext} from "../UserContext";
-import {EyeIcon} from '@heroicons/react/24/outline';
-import AnchoredHint from './AnchoredHint';
+import { DEFAULT_MODEL } from "../constants/appConstants";
+import "./ModelSelect.css";
+import { UserContext } from "../UserContext";
+import { EyeIcon } from "@heroicons/react/24/outline";
+import AnchoredHint from "./AnchoredHint";
 
 interface ModelSelectProps {
   onModelSelect?: (value: string | null) => void;
@@ -27,35 +27,40 @@ interface ModelSelectProps {
   value: string | null;
 }
 
-type SelectOption = { label: string; value: string; info: string; image_support: boolean};
+type SelectOption = {
+  label: string;
+  value: string;
+  info: string;
+  image_support: boolean;
+};
 
 const NONE_MODEL = {
   value: null,
-  label: '(None)',
-  info: '?k',
-  image_support: false
+  label: "(None)",
+  info: "?k",
+  image_support: false,
 };
 
 const ModelSelect: React.FC<ModelSelectProps> = ({
-                                                   onModelSelect,
-                                                   models: externalModels,
-                                                   className,
-                                                   value = null,
-                                                   allowNone = false,
-                                                   allowNoneLabel = '(None)',
-                                                 }) => {
-  const {userSettings, setUserSettings} = useContext(UserContext);
-  const {t} = useTranslation();
+  onModelSelect,
+  models: externalModels,
+  className,
+  value = null,
+  allowNone = false,
+  allowNoneLabel = "(None)",
+}) => {
+  const { userSettings, setUserSettings } = useContext(UserContext);
+  const { t } = useTranslation();
   const [models, setModels] = useState<OpenAIModel[]>([]);
   const [options, setOptions] = useState<SelectOption[]>([]);
   const [selectedOption, setSelectedOption] = useState<SelectOption>();
   const [loading, setLoading] = useState<boolean>(false);
-  const SHOW_MORE_MODELS = t('show-more-models');
-  const SHOW_FEWER_MODELS = t('show-fewer-models');
+  const SHOW_MORE_MODELS = t("show-more-models");
+  const SHOW_FEWER_MODELS = t("show-fewer-models");
   const [menuIsOpen, setMenuIsOpen] = useState(false);
   const [hintVisible, setHintVisible] = useState(false);
-  const MORE_MODELS = 'more';
-  const LESS_MODELS = 'less';
+  const MORE_MODELS = "more";
+  const LESS_MODELS = "less";
 
   const showHint = () => {
     setHintVisible(true);
@@ -64,52 +69,66 @@ const ModelSelect: React.FC<ModelSelectProps> = ({
     setHintVisible(false);
   };
 
-  const isDarkMode = () => userSettings.userTheme === 'dark';
+  const isDarkMode = () => userSettings.userTheme === "dark";
 
   const getColor = (state: OptionProps<SelectOption, false>) => {
     if (state.data.value === MORE_MODELS || state.data.value === LESS_MODELS) {
-      return 'var(--primary)';
+      return "var(--primary)";
     } else {
-      return isDarkMode() ? 'white' : 'black';
+      return isDarkMode() ? "white" : "black";
     }
   };
 
   const getInfoColor = () => {
-    return isDarkMode() ? 'gray' : 'gray';
+    return isDarkMode() ? "gray" : "gray";
   };
 
   const customStyles: StylesConfig<SelectOption, false> = {
     option: (provided, state) => ({
       ...provided,
       color: getColor(state),
-      backgroundColor: isDarkMode() ? (state.isSelected ? '#4A5568' : state.isFocused ? '#2D3748' : '#1A202C') : state.isSelected ? '#edf2f7' : state.isFocused ? '#F2F2F2' : provided.backgroundColor,
-      ':active': {
-        backgroundColor: isDarkMode() ? (state.isSelected ? '#4A5568' : '#2D3748') : (state.isSelected ? 'var(--gray-200)' : '#F2F2F2'),
+      backgroundColor: isDarkMode()
+        ? state.isSelected
+          ? "#4A5568"
+          : state.isFocused
+          ? "#2D3748"
+          : "#1A202C"
+        : state.isSelected
+        ? "#edf2f7"
+        : state.isFocused
+        ? "#F2F2F2"
+        : provided.backgroundColor,
+      ":active": {
+        backgroundColor: isDarkMode()
+          ? state.isSelected
+            ? "#4A5568"
+            : "#2D3748"
+          : state.isSelected
+          ? "var(--gray-200)"
+          : "#F2F2F2",
       },
     }),
     control: (provided) => ({
       ...provided,
-      backgroundColor: isDarkMode() ? '#2D3748' : 'white',
-      color: isDarkMode() ? 'white' : 'black',
-      borderColor: isDarkMode() ? '#4A5568' : '#E2E8F0',
-      boxShadow: isDarkMode() ? '0 0 0 1px #4A5568' : 'none',
-      '&:hover': {
-        borderColor: isDarkMode() ? '#4A5568' : '#CBD5E0',
+      backgroundColor: isDarkMode() ? "#2D3748" : "white",
+      color: isDarkMode() ? "white" : "black",
+      borderColor: isDarkMode() ? "#4A5568" : "#E2E8F0",
+      boxShadow: isDarkMode() ? "0 0 0 1px #4A5568" : "none",
+      "&:hover": {
+        borderColor: isDarkMode() ? "#4A5568" : "#CBD5E0",
       },
     }),
     singleValue: (provided) => ({
       ...provided,
-      color: isDarkMode() ? 'white' : 'black',
+      color: isDarkMode() ? "white" : "black",
     }),
     menu: (provided) => ({
       ...provided,
-      backgroundColor: isDarkMode() ? '#1A202C' : provided.backgroundColor,
+      backgroundColor: isDarkMode() ? "#1A202C" : provided.backgroundColor,
     }),
   };
 
-
-  useEffect(() => {
-  }, []);
+  useEffect(() => {}, []);
 
   useEffect(() => {
     if (externalModels.length > 0) {
@@ -117,11 +136,11 @@ const ModelSelect: React.FC<ModelSelectProps> = ({
     } else {
       setLoading(true);
       ChatService.getModels()
-        .then(data => {
+        .then((data) => {
           setModels(data);
         })
-        .catch(err => {
-          console.error('Error fetching model list', err);
+        .catch((err) => {
+          console.error("Error fetching model list", err);
         })
         .finally(() => setLoading(false));
     }
@@ -134,16 +153,21 @@ const ModelSelect: React.FC<ModelSelectProps> = ({
       info: formatContextWindow(model.context_window),
       image_support: model.image_support,
       preferred: model.preferred,
-      deprecated: model.deprecated
+      deprecated: model.deprecated,
     };
   }
 
   useEffect(() => {
     if (models && models.length > 0) {
-      const defaultOptions = models.filter(model => model.preferred);
+      const defaultOptions = models.filter((model) => model.preferred);
       const newOptions = [
         ...defaultOptions.map((model) => getModelOption(model)),
-        {value: MORE_MODELS, label: SHOW_MORE_MODELS, info: '', image_support: false}
+        {
+          value: MORE_MODELS,
+          label: SHOW_MORE_MODELS,
+          info: "",
+          image_support: false,
+        },
       ];
       setOptions(newOptions);
       let defaultModelId = DEFAULT_MODEL;
@@ -162,7 +186,9 @@ const ModelSelect: React.FC<ModelSelectProps> = ({
         if (found) {
           return;
         } else {
-          console.warn('Model ' + defaultModelId + ' not in the list of models');
+          console.warn(
+            "Model " + defaultModelId + " not in the list of models"
+          );
         }
       }
 
@@ -177,13 +203,14 @@ const ModelSelect: React.FC<ModelSelectProps> = ({
     }
   }, [models, value]);
 
-
   const formatContextWindow = (context_window: number) => {
-    return Math.round(context_window / 1000) + 'k';
-  }
+    return Math.round(context_window / 1000) + "k";
+  };
 
-  const handleModelChange = (option: SingleValue<SelectOption> | MultiValue<SelectOption>,
-                             actionMeta: ActionMeta<SelectOption>) => {
+  const handleModelChange = (
+    option: SingleValue<SelectOption> | MultiValue<SelectOption>,
+    actionMeta: ActionMeta<SelectOption>
+  ) => {
     if (Array.isArray(option)) {
       console.error("Unexpected MultiValue in single-select component", option);
       return;
@@ -192,27 +219,37 @@ const ModelSelect: React.FC<ModelSelectProps> = ({
 
     if (option) {
       if (option.value === MORE_MODELS) {
-        const defaultOptions = models.filter(model => !model.deprecated);
+        const defaultOptions = models.filter((model) => !model.deprecated);
         setOptions([
           ...defaultOptions.map((model) => ({
             value: model.id,
             label: model.id,
             info: formatContextWindow(model.context_window),
-            image_support: model.image_support
+            image_support: model.image_support,
           })),
-          {value: LESS_MODELS, label: SHOW_FEWER_MODELS, info: '',  image_support: false}
+          {
+            value: LESS_MODELS,
+            label: SHOW_FEWER_MODELS,
+            info: "",
+            image_support: false,
+          },
         ]);
         setMenuIsOpen(true);
       } else if (option.value === LESS_MODELS) {
-        const defaultOptions = models.filter(model => model.preferred);
+        const defaultOptions = models.filter((model) => model.preferred);
         setOptions([
           ...defaultOptions.map((model) => ({
             value: model.id,
             label: model.id,
             info: formatContextWindow(model.context_window),
-            image_support: model.image_support
+            image_support: model.image_support,
           })),
-          {value: MORE_MODELS, label: SHOW_MORE_MODELS, info: '',  image_support: false}
+          {
+            value: MORE_MODELS,
+            label: SHOW_MORE_MODELS,
+            info: "",
+            image_support: false,
+          },
         ]);
         setMenuIsOpen(true);
       } else {
@@ -220,7 +257,7 @@ const ModelSelect: React.FC<ModelSelectProps> = ({
           value: option.value,
           label: option.label,
           info: option.info,
-          image_support: option.image_support
+          image_support: option.image_support,
         });
         if (onModelSelect) {
           onModelSelect(option.value);
@@ -232,27 +269,48 @@ const ModelSelect: React.FC<ModelSelectProps> = ({
     }
   };
 
-  const customSingleValue: React.FC<SingleValueProps<SelectOption>> = ({children, ...props}) => (
+  const customSingleValue: React.FC<SingleValueProps<SelectOption>> = ({
+    children,
+    ...props
+  }) => (
     <components.SingleValue {...props}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          width: "100%",
+        }}
+      >
         {/* Model Label */}
         <span>{props.data.label}</span>
 
         {/* Right-aligned Container for Icon and Info */}
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div style={{ display: "flex", alignItems: "center" }}>
           {/* EyeIcon - shown only when image_support is true */}
           {props.data.image_support && (
-            <EyeIcon className="eye-icon" style={{ width: '1em', height: '1em', marginRight: '0.5rem', color: 'gray', marginTop: '2px'  }} />
+            <EyeIcon
+              className="eye-icon"
+              style={{
+                width: "1em",
+                height: "1em",
+                marginRight: "0.5rem",
+                color: "gray",
+                marginTop: "2px",
+              }}
+            />
           )}
 
           {/* Model Info with Tooltip */}
-          <Tooltip title={t('context-window')} side="right" sideOffset={10}>
-          <span style={{
-            fontSize: '0.85rem',
-            color: getInfoColor(),
-          }}>
-            {props.data.info}
-          </span>
+          <Tooltip title={t("context-window")} side="right" sideOffset={10}>
+            <span
+              style={{
+                fontSize: "0.85rem",
+                color: getInfoColor(),
+              }}
+            >
+              {props.data.info}
+            </span>
           </Tooltip>
         </div>
       </div>
@@ -261,25 +319,43 @@ const ModelSelect: React.FC<ModelSelectProps> = ({
 
   const customOption: React.FC<OptionProps<SelectOption, false>> = (props) => (
     <components.Option {...props}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          width: "100%",
+        }}
+      >
         {/* Model Label */}
         <span>{props.data.label}</span>
 
         {/* Right-aligned Container for the Info and EyeIcon */}
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div style={{ display: "flex", alignItems: "center" }}>
           {/* EyeIcon - shown only when image_support is true */}
           {props.data.image_support && (
-            <EyeIcon className="eye-icon" style={{ width: '1em', height: '1em', marginRight: '0.5rem', color: 'gray', marginTop: '2px'  }} />
+            <EyeIcon
+              className="eye-icon"
+              style={{
+                width: "1em",
+                height: "1em",
+                marginRight: "0.5rem",
+                color: "gray",
+                marginTop: "2px",
+              }}
+            />
           )}
 
           {/* Model Info with Tooltip */}
-          <Tooltip title={t('context-window')} side="right" sideOffset={10}>
-          <span style={{
-            fontSize: '0.85rem',
-            color: getInfoColor(),
-          }}>
-            {props.data.info}
-          </span>
+          <Tooltip title={t("context-window")} side="right" sideOffset={10}>
+            <span
+              style={{
+                fontSize: "0.85rem",
+                color: getInfoColor(),
+              }}
+            >
+              {props.data.info}
+            </span>
           </Tooltip>
         </div>
       </div>
@@ -289,21 +365,23 @@ const ModelSelect: React.FC<ModelSelectProps> = ({
   return (
     <AnchoredHint
       content={
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span>Switch to a </span><EyeIcon className="w-5 h-5" aria-hidden="true" /><span>model which supports images.</span>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <span>Switch to a </span>
+          <EyeIcon className="w-5 h-5" aria-hidden="true" />
+          <span>model which supports images.</span>
         </div>
       }
       open={hintVisible}
       close={hideHint}
     >
-      <div className='model-toggle'>
+      <div className="model-toggle">
         <Select
-          className='model-toggle-select'
+          className="model-toggle-select"
           options={options}
           value={selectedOption}
           onChange={handleModelChange}
           isSearchable={true}
-          placeholder={t('select-a-model')}
+          placeholder={t("select-a-model")}
           isLoading={loading}
           styles={customStyles}
           components={{

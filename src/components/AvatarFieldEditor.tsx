@@ -1,6 +1,6 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from "react";
 import FormLabel from "./FormLabel";
-import {useTranslation} from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
 export interface ImageSource {
   data: string | null;
@@ -15,13 +15,13 @@ interface AvatarFieldEditorProps {
 }
 
 const AvatarFieldEditor: React.FC<AvatarFieldEditorProps> = ({
-                                                               image,
-                                                               onImageChange,
-                                                               readOnly = false,
-                                                               size = 120
-                                                             }) => {
+  image,
+  onImageChange,
+  readOnly = false,
+  size = 120,
+}) => {
   const [imageSrc, setImageSrc] = useState<ImageSource>(image);
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   useEffect(() => {
     setImageSrc(image);
@@ -36,16 +36,16 @@ const AvatarFieldEditor: React.FC<AvatarFieldEditorProps> = ({
       const reader = new FileReader();
       reader.onload = (e) => {
         const result = e.target!.result as string;
-        if (file.type.startsWith('image/svg+xml')) {
-          setImageSrc({data: result, type: 'svg'});
+        if (file.type.startsWith("image/svg+xml")) {
+          setImageSrc({ data: result, type: "svg" });
           if (onImageChange) {
-            onImageChange({data: result, type: 'svg'});
+            onImageChange({ data: result, type: "svg" });
           }
-        } else if (file.type.startsWith('image/')) {
+        } else if (file.type.startsWith("image/")) {
           const img = new Image();
           img.src = result;
           img.onload = () => {
-            const canvas = document.createElement('canvas');
+            const canvas = document.createElement("canvas");
             canvas.width = size;
             canvas.height = size;
 
@@ -55,7 +55,7 @@ const AvatarFieldEditor: React.FC<AvatarFieldEditorProps> = ({
             const xOffset = (scaledWidth - size) / 2;
             const yOffset = (scaledHeight - size) / 2;
 
-            const ctx = canvas.getContext('2d');
+            const ctx = canvas.getContext("2d");
             if (ctx) {
               // Assuming img.width or img.height could be larger, find the smaller dimension
               const minDimension = Math.min(img.width, img.height);
@@ -66,13 +66,23 @@ const AvatarFieldEditor: React.FC<AvatarFieldEditorProps> = ({
 
               // Draw the cropped and resized version of the image on the canvas
               // Here the source crop (sx, sy, minDimension, minDimension) is drawn onto the canvas at full size (size, size)
-              ctx.drawImage(img, sx, sy, minDimension, minDimension, 0, 0, size, size);
+              ctx.drawImage(
+                img,
+                sx,
+                sy,
+                minDimension,
+                minDimension,
+                0,
+                0,
+                size,
+                size
+              );
             }
 
-            const resizedImgDataURL = canvas.toDataURL('image/png');
-            setImageSrc({data: resizedImgDataURL, type: 'raster'});
+            const resizedImgDataURL = canvas.toDataURL("image/png");
+            setImageSrc({ data: resizedImgDataURL, type: "raster" });
             if (onImageChange) {
-              onImageChange({data: resizedImgDataURL, type: 'raster'});
+              onImageChange({ data: resizedImgDataURL, type: "raster" });
             }
           };
         }
@@ -82,59 +92,74 @@ const AvatarFieldEditor: React.FC<AvatarFieldEditorProps> = ({
   };
 
   return (
-      <div className="mb-4">
-        <FormLabel readOnly={readOnly} label={t('icon-header')} htmlFor="icon" value={image}></FormLabel>
-        <div className="relative flex justify-center items-center">
-          {imageSrc.data ? (
-              <img
-                  src={imageSrc.data}
-                  alt="User Avatar"
-                  style={{width: `${size}px`, height: `${size}px`, borderRadius: '50%', objectFit: 'cover'}}
+    <div className="mb-4">
+      <FormLabel
+        readOnly={readOnly}
+        label={t("icon-header")}
+        htmlFor="icon"
+        value={image}
+      ></FormLabel>
+      <div className="relative flex justify-center items-center">
+        {imageSrc.data ? (
+          <img
+            src={imageSrc.data}
+            alt="User Avatar"
+            style={{
+              width: `${size}px`,
+              height: `${size}px`,
+              borderRadius: "50%",
+              objectFit: "cover",
+            }}
+          />
+        ) : (
+          <div
+            style={{
+              width: `${size}px`,
+              height: `${size}px`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              border: "2px dashed gray",
+              borderRadius: "50%",
+            }}
+          >
+            <svg
+              className="text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              style={{
+                width: `${size * 0.29}px`,
+                height: `${size * 0.29}px`,
+              }} // Adjust SVG size relative to the container size
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
               />
-          ) : (
-              <div
-                  style={{
-                    width: `${size}px`,
-                    height: `${size}px`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    border: '2px dashed gray',
-                    borderRadius: '50%'
-                  }}
-              >
-                <svg
-                    className="text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    style={{
-                      width: `${size * 0.29}px`,
-                      height: `${size * 0.29}px`
-                    }} // Adjust SVG size relative to the container size
-                    xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4"/>
-                </svg>
-              </div>
-          )}
-          {!readOnly && ( // Conditionally render the input based on readOnly status
-              <input
-                  id="icon"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  style={{
-                    position: 'absolute',
-                    opacity: 0,
-                    width: `${size}px`,
-                    height: `${size}px`,
-                    cursor: 'pointer'
-                  }}
-              />
-          )}
-        </div>
+            </svg>
+          </div>
+        )}
+        {!readOnly && ( // Conditionally render the input based on readOnly status
+          <input
+            id="icon"
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            style={{
+              position: "absolute",
+              opacity: 0,
+              width: `${size}px`,
+              height: `${size}px`,
+              cursor: "pointer",
+            }}
+          />
+        )}
       </div>
+    </div>
   );
 };
 

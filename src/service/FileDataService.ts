@@ -1,5 +1,5 @@
-import Dexie from 'dexie';
-import {FileData} from '../models/FileData';
+import Dexie from "dexie";
+import { FileData } from "../models/FileData";
 
 class FileDB extends Dexie {
   fileData: Dexie.Table<FileData, number>;
@@ -7,7 +7,7 @@ class FileDB extends Dexie {
   constructor() {
     super("FileDB");
     this.version(1).stores({
-      fileData: '++id'
+      fileData: "++id",
     });
     this.fileData = this.table("fileData");
   }
@@ -24,7 +24,10 @@ class FileDataService {
     return db.fileData.add(fileData);
   }
 
-  static async updateFileData(id: number, changes: Partial<FileData>): Promise<number> {
+  static async updateFileData(
+    id: number,
+    changes: Partial<FileData>
+  ): Promise<number> {
     return db.fileData.update(id, changes);
   }
 

@@ -1,25 +1,24 @@
-import Dexie from 'dexie';
-import {EventEmitter} from "./EventEmitter";
-import FileDataService from './FileDataService';
-import { ChatMessage } from '../models/ChatCompletion';
+import Dexie from "dexie";
+import { EventEmitter } from "./EventEmitter";
+import FileDataService from "./FileDataService";
+import { ChatMessage } from "../models/ChatCompletion";
 
 export interface Conversation {
   id: number;
   gid: number;
   timestamp: number;
   title: string;
-  model: string | null,
-  systemPrompt: string,
+  model: string | null;
+  systemPrompt: string;
   messages: string; // stringified ChatMessage[]
   marker?: boolean;
 }
 
 export interface ConversationChangeEvent {
-  action: 'add' | 'edit' | 'delete',
-  id: number,
-  conversation?: Conversation, // not set on delete
+  action: "add" | "edit" | "delete";
+  id: number;
+  conversation?: Conversation; // not set on delete
 }
-
 
 class ConversationDB extends Dexie {
   conversations: Dexie.Table<Conversation, number>;
@@ -27,7 +26,7 @@ class ConversationDB extends Dexie {
   constructor() {
     super("conversationsDB");
     this.version(1).stores({
-      conversations: '&id, gid, timestamp, title, model'
+      conversations: "&id, gid, timestamp, title, model",
     });
     this.conversations = this.table("conversations");
   }
@@ -37,22 +36,28 @@ const db = new ConversationDB();
 const NUM_INITIAL_CONVERSATIONS = 200;
 
 class ConversationService {
-
-  static async getConversationById(id: number): Promise<Conversation | undefined> {
+  static async getConversationById(
+    id: number
+  ): Promise<Conversation | undefined> {
     return db.conversations.get(id);
   }
 
-  static async getChatMessages(conversation: Conversation): Promise<ChatMessage[]> {
+  static async getChatMessages(
+    conversation: Conversation
+  ): Promise<ChatMessage[]> {
     const messages: ChatMessage[] = JSON.parse(conversation.messages);
 
     const messagesWithFileDataPromises = messages.map(async (message) => {
       if (!message.fileDataRef) {
         return message;
       }
-      const fileDataRefsPromises = (message.fileDataRef || []).map(async (fileDataRef) => {
-        fileDataRef.fileData = await FileDataService.getFileData(fileDataRef.id) || null;
-        return fileDataRef;
-      });
+      const fileDataRefsPromises = (message.fileDataRef || []).map(
+        async (fileDataRef) => {
+          fileDataRef.fileData =
+            (await FileDataService.getFileData(fileDataRef.id)) || null;
+          return fileDataRef;
+        }
+      );
 
       message.fileDataRef = await Promise.all(fileDataRefsPromises);
       return message;
@@ -62,40 +67,51 @@ class ConversationService {
     return Promise.all(messagesWithFileDataPromises);
   }
 
-  static async searchConversationsByTitle(searchString: string): Promise<Conversation[]> {
+  static async searchConversationsByTitle(
+    searchString: string
+  ): Promise<Conversation[]> {
     searchString = searchString.toLowerCase();
     return db.conversations
-      .filter(conversation => conversation.title.toLowerCase().includes(searchString))
+      .filter((conversation) =>
+        conversation.title.toLowerCase().includes(searchString)
+      )
       .toArray();
   }
 
-
   // todo: Currently we are not indexing messages since it is expensive
-  static async searchWithinConversations(searchString: string): Promise<Conversation[]> {
+  static async searchWithinConversations(
+    searchString: string
+  ): Promise<Conversation[]> {
     return db.conversations
-        .filter(conversation => conversation.messages.includes(searchString))
-        .toArray();
+      .filter((conversation) => conversation.messages.includes(searchString))
+      .toArray();
   }
-
 
   // This is adding a new conversation object with empty messages "[]"
   static async addConversation(conversation: Conversation): Promise<void> {
     await db.conversations.add(conversation);
-    let event: ConversationChangeEvent = {action: 'add', id: conversation.id, conversation: conversation};
-    conversationsEmitter.emit('conversationChangeEvent', event);
+    let event: ConversationChangeEvent = {
+      action: "add",
+      id: conversation.id,
+      conversation: conversation,
+    };
+    conversationsEmitter.emit("conversationChangeEvent", event);
   }
 
   static deepCopyChatMessages(messages: ChatMessage[]): ChatMessage[] {
-    return messages.map(msg => ({
+    return messages.map((msg) => ({
       ...msg,
-      fileDataRef: msg.fileDataRef?.map(fileRef => ({
+      fileDataRef: msg.fileDataRef?.map((fileRef) => ({
         ...fileRef,
         fileData: fileRef.fileData ? { ...fileRef.fileData } : null,
-      }))
+      })),
     }));
   }
 
-  static async updateConversation(conversation: Conversation, messages: ChatMessage[]): Promise<void> {
+  static async updateConversation(
+    conversation: Conversation,
+    messages: ChatMessage[]
+  ): Promise<void> {
     const messagesCopy = ConversationService.deepCopyChatMessages(messages);
 
     for (let i = 0; i < messagesCopy.length; i++) {
@@ -117,14 +133,20 @@ class ConversationService {
 
     conversation.messages = JSON.stringify(messagesCopy);
     await db.conversations.put(conversation);
-    let event: ConversationChangeEvent = {action: 'edit', id: conversation.id, conversation: conversation};
-    conversationsEmitter.emit('conversationChangeEvent', event);
+    let event: ConversationChangeEvent = {
+      action: "edit",
+      id: conversation.id,
+      conversation: conversation,
+    };
+    conversationsEmitter.emit("conversationChangeEvent", event);
   }
 
-  static async updateConversationPartial(conversation: Conversation, changes: any): Promise<number> {
+  static async updateConversationPartial(
+    conversation: Conversation,
+    changes: any
+  ): Promise<number> {
     // todo: currently not emitting event for this case
-    return db.conversations
-        .update(conversation.id, changes)
+    return db.conversations.update(conversation.id, changes);
   }
 
   static async deleteConversation(id: number): Promise<void> {
@@ -134,17 +156,19 @@ class ConversationService {
 
       for (let message of messages) {
         if (message.fileDataRef && message.fileDataRef.length > 0) {
-          await Promise.all(message.fileDataRef.map(async (fileRef) => {
-            if (fileRef.id) {
-              await FileDataService.deleteFileData(fileRef.id);
-            }
-          }));
+          await Promise.all(
+            message.fileDataRef.map(async (fileRef) => {
+              if (fileRef.id) {
+                await FileDataService.deleteFileData(fileRef.id);
+              }
+            })
+          );
         }
       }
       await db.conversations.delete(id);
 
-      let event: ConversationChangeEvent = {action: 'delete', id: id};
-      conversationsEmitter.emit('conversationChangeEvent', event);
+      let event: ConversationChangeEvent = { action: "delete", id: id };
+      conversationsEmitter.emit("conversationChangeEvent", event);
     } else {
       console.log(`Conversation with ID ${id} not found.`);
     }
@@ -153,20 +177,25 @@ class ConversationService {
   static async deleteAllConversations(): Promise<void> {
     await db.conversations.clear();
     await FileDataService.deleteAllFileData();
-    let event: ConversationChangeEvent = {action: 'delete', id: 0};
-    conversationsEmitter.emit('conversationChangeEvent', event);
+    let event: ConversationChangeEvent = { action: "delete", id: 0 };
+    conversationsEmitter.emit("conversationChangeEvent", event);
   }
 
   static async loadRecentConversationsTitleOnly(): Promise<Conversation[]> {
     try {
       const conversations = await db.conversations
-        .orderBy('timestamp')
+        .orderBy("timestamp")
         .reverse()
         .limit(NUM_INITIAL_CONVERSATIONS)
-        .toArray(conversations => conversations.map(conversation => {
-          const conversationWithEmptyMessages = {...conversation, messages: "[]"};
-          return conversationWithEmptyMessages;
-        }));
+        .toArray((conversations) =>
+          conversations.map((conversation) => {
+            const conversationWithEmptyMessages = {
+              ...conversation,
+              messages: "[]",
+            };
+            return conversationWithEmptyMessages;
+          })
+        );
       return conversations;
     } catch (error) {
       console.error("Error loading recent conversations:", error);
@@ -174,23 +203,21 @@ class ConversationService {
     }
   }
 
-
   static async countConversationsByGid(id: number): Promise<number> {
-    return db.conversations
-        .where('gid').equals(id)
-        .count();
+    return db.conversations.where("gid").equals(id).count();
   }
 
   static async deleteConversationsByGid(gid: number): Promise<void> {
     const conversationsToDelete = await db.conversations
-      .where('gid').equals(gid).toArray();
+      .where("gid")
+      .equals(gid)
+      .toArray();
     for (const conversation of conversationsToDelete) {
       await ConversationService.deleteConversation(conversation.id);
     }
-    let event: ConversationChangeEvent = {action: 'delete', id: 0};
-    conversationsEmitter.emit('conversationChangeEvent', event);
+    let event: ConversationChangeEvent = { action: "delete", id: 0 };
+    conversationsEmitter.emit("conversationChangeEvent", event);
   }
-
 }
 
 export const conversationsEmitter = new EventEmitter<ConversationChangeEvent>();

@@ -1,4 +1,4 @@
-# OpenAI React Chat Web Application
+# OpenAI React Chat Web Application 
 <!-- markdown-link-check-disable -->
 This project provides a web frontend for the OpenAI chat API. This project is for developers or advanced users that are familiar with [OpenAI ChatGPT](https://chat.openai.com/) but want to customize the web interface.
 ## Goals

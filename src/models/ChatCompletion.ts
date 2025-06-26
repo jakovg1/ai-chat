@@ -2,21 +2,21 @@ import { FileDataRef } from "./FileData";
 
 // Ref: https://platform.openai.com/docs/api-reference/chat/create
 export enum Role {
-  System = 'system',
-  User = 'user',
-  Assistant = 'assistant',
+  System = "system",
+  User = "user",
+  Assistant = "assistant",
 }
 
 export interface ChatMessagePart {
-  type: string,
+  type: string;
   text?: string;
   image_url?: {
-    url: string
-  }
+    url: string;
+  };
 }
 
 export interface ChatCompletionMessage {
-  role: Role,
+  role: Role;
   content: ChatMessagePart[];
 }
 
@@ -31,7 +31,7 @@ export interface ChatCompletionRequest {
   max_tokens?: number | null;
   n?: number | null;
   response_format?: {
-    type: 'json_object';
+    type: "json_object";
   } | null;
   seed?: number | null;
   stop?: string | string[] | null;
@@ -39,12 +39,16 @@ export interface ChatCompletionRequest {
   temperature?: number | null;
   top_p?: number | null;
   tools?: any[];
-  tool_choice?: 'none' | 'auto' | {
-    type: 'function';
-    function: {
-      name: string;
-    };
-  } | null;
+  tool_choice?:
+    | "none"
+    | "auto"
+    | {
+        type: "function";
+        function: {
+          name: string;
+        };
+      }
+    | null;
   user?: string;
 }
 
@@ -81,8 +85,8 @@ export function getRole(roleString: string): Role {
 }
 
 export enum MessageType {
-  Normal = 'normal',
-  Error = 'error',
+  Normal = "normal",
+  Error = "error",
 }
 
 export function getMessageType(messageTypeString: string): MessageType {

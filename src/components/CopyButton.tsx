@@ -1,8 +1,8 @@
-import React, {useEffect, useState} from "react";
-import {CheckIcon, ClipboardIcon} from "@heroicons/react/24/outline";
-import {iconProps} from "../svg";
-import {useTranslation} from 'react-i18next';
-import "./Button.css"
+import React, { useEffect, useState } from "react";
+import { CheckIcon, ClipboardIcon } from "@heroicons/react/24/outline";
+import { iconProps } from "../svg";
+import { useTranslation } from "react-i18next";
+import "./Button.css";
 import Tooltip from "./Tooltip";
 
 export enum CopyButtonMode {
@@ -16,8 +16,12 @@ interface CopyButtonProps {
   className?: string;
 }
 
-const CopyButton = ({text, mode = CopyButtonMode.Normal, className = ''}: CopyButtonProps) => {
-  const {t} = useTranslation();
+const CopyButton = ({
+  text,
+  mode = CopyButtonMode.Normal,
+  className = "",
+}: CopyButtonProps) => {
+  const { t } = useTranslation();
   const [isCopied, setIsCopied] = useState(false);
 
   useEffect(() => {
@@ -49,34 +53,36 @@ const CopyButton = ({text, mode = CopyButtonMode.Normal, className = ''}: CopyBu
 
   const shouldWrapInTooltip = mode !== CopyButtonMode.Normal;
   const buttonContent = (
-      <>
-        {isCopied ? (
-            <>
-              <CheckIcon {...iconProps} />
-              {mode === CopyButtonMode.Normal && <span>{t('copied')}</span>}
-            </>
-        ) : (
-            <>
-              <ClipboardIcon {...iconProps} />
-              {mode === CopyButtonMode.Normal && <span>{t('copy-code')}</span>}
-            </>
-        )}
-      </>
+    <>
+      {isCopied ? (
+        <>
+          <CheckIcon {...iconProps} />
+          {mode === CopyButtonMode.Normal && <span>{t("copied")}</span>}
+        </>
+      ) : (
+        <>
+          <ClipboardIcon {...iconProps} />
+          {mode === CopyButtonMode.Normal && <span>{t("copy-code")}</span>}
+        </>
+      )}
+    </>
   );
   return shouldWrapInTooltip ? (
-      <Tooltip title={t('copy-button')} side="top" sideOffset={0}>
-        <button
-            className={`chat-action-button text-gray-400 inline-flex items-center justify-center p-1 ml-auto gap-2 ${className}`}
-            onClick={handleCopyClick}>
-          {buttonContent}
-        </button>
-      </Tooltip>
-  ) : (
+    <Tooltip title={t("copy-button")} side="top" sideOffset={0}>
       <button
-          className={`chat-action-button text-gray-400 inline-flex items-center justify-center p-1 ml-auto gap-2 ${className}`}
-          onClick={handleCopyClick}>
+        className={`chat-action-button text-gray-400 inline-flex items-center justify-center p-1 ml-auto gap-2 ${className}`}
+        onClick={handleCopyClick}
+      >
         {buttonContent}
       </button>
+    </Tooltip>
+  ) : (
+    <button
+      className={`chat-action-button text-gray-400 inline-flex items-center justify-center p-1 ml-auto gap-2 ${className}`}
+      onClick={handleCopyClick}
+    >
+      {buttonContent}
+    </button>
   );
 };
 

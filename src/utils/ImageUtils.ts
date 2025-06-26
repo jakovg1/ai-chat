@@ -1,9 +1,12 @@
-export const preprocessImage = async (file: File, callback: (base64Data: string, file: File) => void) => {
+export const preprocessImage = async (
+  file: File,
+  callback: (base64Data: string, file: File) => void
+) => {
   if (!file) return;
 
   const imageBitmap = await createImageBitmap(file);
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
 
   const maxLongerDimension = 2000;
   const maxSmallerDimension = 768;
@@ -20,8 +23,14 @@ export const preprocessImage = async (file: File, callback: (base64Data: string,
   const smallerDimension = isWidthLonger ? originalHeight : originalWidth;
 
   // Calculate the scaling factor
-  const longerDimensionScale = longerDimension > maxLongerDimension ? maxLongerDimension / longerDimension : 1;
-  const smallerDimensionScale = smallerDimension > maxSmallerDimension ? maxSmallerDimension / smallerDimension : 1;
+  const longerDimensionScale =
+    longerDimension > maxLongerDimension
+      ? maxLongerDimension / longerDimension
+      : 1;
+  const smallerDimensionScale =
+    smallerDimension > maxSmallerDimension
+      ? maxSmallerDimension / smallerDimension
+      : 1;
 
   // Choose the smaller scaling factor to ensure both dimensions are within limits
   const scaleFactor = Math.min(longerDimensionScale, smallerDimensionScale);

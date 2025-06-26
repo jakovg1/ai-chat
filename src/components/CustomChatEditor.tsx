@@ -1,33 +1,36 @@
-import React, {useEffect, useState} from "react";
-import {useLocation, useNavigate, useParams} from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import ChatSettingsForm from "./ChatSettingsForm";
-import {ChatSettings} from "../models/ChatSettings";
-import chatSettingsDB, {getChatSettingsById} from "../service/ChatSettingsDB";
+import { ChatSettings } from "../models/ChatSettings";
+import chatSettingsDB, { getChatSettingsById } from "../service/ChatSettingsDB";
 import Button from "./Button";
-import {useTranslation} from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
 const CustomChatEditor: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const {id} = useParams();
+  const { id } = useParams();
   const isEditing = Boolean(id);
   const initialChatSettings: ChatSettings = {
     id: isEditing ? parseInt(id!) : Date.now(),
-    author: 'user',
+    author: "user",
     icon: null,
-    name: '',
-    description: '',
-    instructions: 'You are a helpful assistant.',
+    name: "",
+    description: "",
+    instructions: "You are a helpful assistant.",
     model: null,
     seed: null,
     temperature: null,
-    top_p: null
+    top_p: null,
   };
-  const {t} = useTranslation();
-  const [chatSettings, setChatSettings] = useState<ChatSettings>(initialChatSettings);
+  const { t } = useTranslation();
+  const [chatSettings, setChatSettings] =
+    useState<ChatSettings>(initialChatSettings);
 
   useEffect(() => {
-    let stateChatSetting = location.state?.initialChatSetting as ChatSettings | undefined;
+    let stateChatSetting = location.state?.initialChatSetting as
+      | ChatSettings
+      | undefined;
     if (stateChatSetting) {
       stateChatSetting.id = Date.now();
       setChatSettings(stateChatSetting);
@@ -50,11 +53,11 @@ const CustomChatEditor: React.FC = () => {
     } else {
       await chatSettingsDB.chatSettings.add(chatSettings);
     }
-    navigate('/explore');
+    navigate("/explore");
   };
 
   const handleCancel = () => {
-    navigate('/explore');
+    navigate("/explore");
   };
 
   const onChange = (updatedChatSettings: ChatSettings) => {
@@ -62,25 +65,21 @@ const CustomChatEditor: React.FC = () => {
   };
 
   return (
-      <div className="h-full">
-        <ChatSettingsForm chatSettings={chatSettings} onChange={onChange}/>
-        <div className="flex justify-end space-x-4 px-8 mt-4 w-full md:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto">
-          <Button
-              onClick={handleSave}
-              disabled={!chatSettings.name}
-              variant="primary"
-          >
-            {isEditing ? t('save-button') : t('create-button')}
-          </Button>
-          <Button
-              onClick={handleCancel}
-              variant="secondary"
-              className="mr-2"
-          >
-            {t('cancel-button')}
-          </Button>
-        </div>
+    <div className="h-full">
+      <ChatSettingsForm chatSettings={chatSettings} onChange={onChange} />
+      <div className="flex justify-end space-x-4 px-8 mt-4 w-full md:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto">
+        <Button
+          onClick={handleSave}
+          disabled={!chatSettings.name}
+          variant="primary"
+        >
+          {isEditing ? t("save-button") : t("create-button")}
+        </Button>
+        <Button onClick={handleCancel} variant="secondary" className="mr-2">
+          {t("cancel-button")}
+        </Button>
       </div>
+    </div>
   );
 };
 

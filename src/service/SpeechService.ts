@@ -1,21 +1,26 @@
-import {OpenAIModel} from "../models/model";
-import {OPENAI_API_KEY} from "../config";
-import {CustomError} from "./CustomError";
-import {MODELS_ENDPOINT, TTS_ENDPOINT} from "../constants/apiEndpoints";
-import {SpeechSettings} from "../models/SpeechSettings"; // Adjust the path as necessary
+import { OpenAIModel } from "../models/model";
+import { OPENAI_API_KEY } from "../config";
+import { CustomError } from "./CustomError";
+import { MODELS_ENDPOINT, TTS_ENDPOINT } from "../constants/apiEndpoints";
+import { SpeechSettings } from "../models/SpeechSettings"; // Adjust the path as necessary
 
 export class SpeechService {
   private static models: Promise<OpenAIModel[]> | null = null;
 
-  static async textToSpeech(text: string, settings: SpeechSettings): Promise<string> {
+  static async textToSpeech(
+    text: string,
+    settings: SpeechSettings
+  ): Promise<string> {
     const endpoint = TTS_ENDPOINT;
     const headers = {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${OPENAI_API_KEY}`,
+      Authorization: `Bearer ${OPENAI_API_KEY}`,
     };
 
     if (text.length > 4096) {
-      throw new Error("Input text exceeds the maximum length of 4096 characters.");
+      throw new Error(
+        "Input text exceeds the maximum length of 4096 characters."
+      );
     }
 
     if (settings.speed < 0.25 || settings.speed > 4.0) {
@@ -57,7 +62,7 @@ export class SpeechService {
     try {
       const response = await fetch(MODELS_ENDPOINT, {
         headers: {
-          "Authorization": `Bearer ${OPENAI_API_KEY}`,
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
         },
       });
 
@@ -67,7 +72,9 @@ export class SpeechService {
       }
 
       const data = await response.json();
-      const models: OpenAIModel[] = data.data.filter((model: OpenAIModel) => model.id.includes("tts"));
+      const models: OpenAIModel[] = data.data.filter((model: OpenAIModel) =>
+        model.id.includes("tts")
+      );
       this.models = Promise.resolve(models);
       return models;
     } catch (err: any) {

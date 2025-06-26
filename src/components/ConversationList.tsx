@@ -240,7 +240,7 @@ const ConversationList: React.FC = () => {
       >
         {/* <button
           className="flex px-3 h-[2rem] py-2 items-center gap-3
-                               transition-colors duration-200 dark:text-white
+                               transition-colors duration-200 dark:text-white 
                                cursor-pointer text-sm rounded-md border dark:border-white/20 hover:bg-gray-500/10
                                bg-white dark:bg-transparent overflow-hidden"
           onClick={onNewChat}
