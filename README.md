@@ -1,20 +1,6 @@
-# OpenAI React Chat Web Application 
+# Chatbot UI in React 
 <!-- markdown-link-check-disable -->
 This project provides a web frontend for the OpenAI chat API. This project is for developers or advanced users that are familiar with [OpenAI ChatGPT](https://chat.openai.com/) but want to customize the web interface.
-## Goals
-* Provide the same features as [OpenAI ChatGPT](https://chat.openai.com/) and <!-- markdown-link-check-enable -->
-[OpenAI Playground](https://platform.openai.com/playground?mode=chat).
-* Use a modern web stack of React, Tailwind CSS, and Typescript.
-
-See [FEATURES.md](FEATURES.md) for details.
-
-## Preview
-
-![openai-react-chat-0812-demo](https://github.com/user-attachments/assets/4140d46c-cff2-481b-b606-d2ce869209f3)
-
-
-
-
 
 ## Requirements
 
@@ -28,7 +14,8 @@ See [FEATURES.md](FEATURES.md) for details.
 
 1. Clone the repository.
 ```
-git clone https://github.com/elebitzero/openai-react-chat.git
+git clone https://github.com/jakovg1/ai-chat.git
+
 ```
 2. Copy [env.json](src/env.json)  to `local.env.json` and change 'your-api-key-here' to your [OpenAI Key](https://platform.openai.com/account/api-keys)
 3. Build & Run the web server
