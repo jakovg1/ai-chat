@@ -10,7 +10,7 @@ import { Conversation } from "../service/ConversationService";
 import { OPENAI_DEFAULT_SYSTEM_PROMPT } from "../config";
 import { DEFAULT_INSTRUCTIONS } from "../constants/appConstants";
 import { UserContext } from "../UserContext";
-import { InformationCircleIcon } from "@heroicons/react/24/out line";
+// import { InformationCircleIcon } from "@heroicons/react/24/out line";
 import { NotificationService } from "../service/NotificationService";
 
 interface Props {
@@ -133,11 +133,11 @@ const Chat: React.FC<Props> = ({
                     color: "#6b7280",
                   }}
                 >
-                  <InformationCircleIcon
+                  {/* <InformationCircleIcon
                     width={20}
                     height={20}
                     stroke={"currentColor"}
-                  />
+                  /> */}
                 </span>
               </Tooltip>
             )}
@@ -201,6 +201,7 @@ const Chat: React.FC<Props> = ({
           </div>
         </div>
         {chatBlocks.map((block, index) => (
+          // <p>FOO CHAT BLOK</p>
           <ChatBlock
             key={`chat-block-${block.id}`}
             block={block}

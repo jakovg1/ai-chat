@@ -614,9 +614,7 @@ const MainPage: React.FC<MainPageProps> = ({
   // ---------------------------------
 
   return (
-    <div
-      className={`${className} overflow-hidden w-full h-full relative flex z-0 dark:bg-gray-900`}
-    >
+    <div className={`${className} `}>
       <div className="flex flex-col items-stretch w-full h-full">
         <main
           className="relative h-full transition-width flex flex-col overflow-hidden items-stretch flex-1"

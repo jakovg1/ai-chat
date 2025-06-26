@@ -415,7 +415,7 @@ const MessageBox = forwardRef<MessageBoxHandles, MessageBoxProps>(
                   onClick={(e) => handleAttachment(e)}
                   className="p-1 relative z-10"
                 >
-                  <PaperClipIcon className="h-6 w-6" />
+                  <PaperClipIcon className="h-6 w-6 ml-2" />
                 </button>
               </div>
 

@@ -86,6 +86,7 @@ const ChatBlock: React.FC<Props> = ({ block, loading, isLastBlock }) => {
     <div
       key={`chat-block-${block.id}`}
       className={`group w-full text-gray-800 dark:text-gray-100 border-b border-black/10 dark:border-gray-900/50
+        
             ${
               block.role === "assistant"
                 ? "bg-custom-gray dark:bg-gray-900"
@@ -96,11 +97,11 @@ const ChatBlock: React.FC<Props> = ({ block, loading, isLastBlock }) => {
         <div className="w-full flex">
           <div className="w-[30px] flex flex-col relative items-end mr-4">
             <div className="relative flex h-[30px] w-[30px] p-0 rounded-xs items-center justify-center">
-              {block.role === "user" ? (
+              {/* {block.role === "user" ? (
                 <UserCircleIcon width={24} height={24} />
               ) : block.role === "assistant" ? (
                 <SparklesIcon key={`open-ai-logo-${block.id}`} />
-              ) : null}
+              ) : null} */}
             </div>
           </div>
           <div className="relative flex w-[calc(100%-50px)] flex-col gap-1 md:gap-3 lg:w-full">

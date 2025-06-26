@@ -122,7 +122,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 </button>
                 <ChatShortcuts />
 
-                <ConversationList onNewChat={handleNewChat} />
+                <ConversationList />
               </nav>
             </div>
           </div>
