@@ -1,66 +1,72 @@
-import React, {useContext, useEffect, useRef, useState} from 'react';
-import {useLocation} from 'react-router-dom';
-import {MagnifyingGlassIcon} from "@heroicons/react/24/outline";
+import React, { useContext, useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import ConversationService, {
   Conversation,
   ConversationChangeEvent,
-  conversationsEmitter
+  conversationsEmitter,
 } from "../service/ConversationService";
-import {iconProps} from "../svg";
-import {useTranslation} from "react-i18next";
-import {UserContext} from "../UserContext";
-import ConversationListItem from './ConversationListItem';
+import { iconProps } from "../svg";
+import { useTranslation } from "react-i18next";
+import { UserContext } from "../UserContext";
+import ConversationListItem from "./ConversationListItem";
 
 function useCurrentPath() {
   return useLocation().pathname;
 }
 
 const ConversationList: React.FC = () => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [searchInputValue, setSearchInputValue] = useState("");
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const currentPath = useCurrentPath();
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const [showSearchOptions, setShowSearchOptions] = useState(false);
-  const [conversationsWithMarkers, setConversationsWithMarkers] = useState<Conversation[]>([]);
+  const [conversationsWithMarkers, setConversationsWithMarkers] = useState<
+    Conversation[]
+  >([]);
   const { userSettings } = useContext(UserContext);
-
 
   useEffect(() => {
     loadConversations();
-    conversationsEmitter.on('conversationChangeEvent', handleConversationChange);
+    conversationsEmitter.on(
+      "conversationChangeEvent",
+      handleConversationChange
+    );
 
     return () => {
-      conversationsEmitter.off('conversationChangeEvent', handleConversationChange);
+      conversationsEmitter.off(
+        "conversationChangeEvent",
+        handleConversationChange
+      );
     };
-
   }, []);
-
 
   useEffect(() => {
     const handleSelectedConversation = (id: string | null) => {
       if (id && id.length > 0) {
         let n = Number(id);
-        ConversationService.getConversationById(n)
-          .then(conversation => {
-            if (conversation) {
-              setSelectedId(conversation.id);
-            } else {
-              console.error("Conversation not found.");
-            }
-          });
+        ConversationService.getConversationById(n).then((conversation) => {
+          if (conversation) {
+            setSelectedId(conversation.id);
+          } else {
+            console.error("Conversation not found.");
+          }
+        });
       } else {
         setSelectedId(null);
       }
     };
 
-    const itemId = currentPath.split('/c/')[1];
-    handleSelectedConversation(itemId)
+    const itemId = currentPath.split("/c/")[1];
+    handleSelectedConversation(itemId);
   }, [currentPath]);
 
   useEffect(() => {
-    const sortedConversations = [...conversations].sort((a, b) => b.timestamp - a.timestamp);  // Sort by timestamp if not already sorted
+    const sortedConversations = [...conversations].sort(
+      (a, b) => b.timestamp - a.timestamp
+    ); // Sort by timestamp if not already sorted
     setConversationsWithMarkers(insertTimeMarkers(sortedConversations));
   }, [conversations]);
 
@@ -72,19 +78,19 @@ const ConversationList: React.FC = () => {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
     if (diffDays === 1) {
-      return t('today');
+      return t("today");
     }
     if (diffDays === 2) {
-      return t('yesterday');
+      return t("yesterday");
     }
     if (diffDays <= 7) {
-      return t('previous-7-days');
+      return t("previous-7-days");
     }
     if (diffDays <= 30) {
-      return t('previous-30-days');
+      return t("previous-30-days");
     }
 
-    return date.toLocaleString(navigator.language, {month: 'long'});
+    return date.toLocaleString(navigator.language, { month: "long" });
   };
 
   const insertTimeMarkers = (conversations: Conversation[]) => {
@@ -101,7 +107,7 @@ const ConversationList: React.FC = () => {
           systemPrompt: "",
           timestamp: 0,
           marker: true,
-          title: currentHeader
+          title: currentHeader,
         });
         lastHeader = currentHeader;
       }
@@ -110,64 +116,75 @@ const ConversationList: React.FC = () => {
     return withMarkers;
   };
 
-
   const loadConversations = async () => {
-    ConversationService.loadRecentConversationsTitleOnly().then(conversations => {
-      setConversations(conversations);
-    }).catch(error => {
-      console.error("Error loading conversations:", error);
-    });
+    ConversationService.loadRecentConversationsTitleOnly()
+      .then((conversations) => {
+        setConversations(conversations);
+      })
+      .catch((error) => {
+        console.error("Error loading conversations:", error);
+      });
   };
 
   const handleConversationChange = (event: ConversationChangeEvent) => {
-
-    if (event.action === 'add') {
+    if (event.action === "add") {
       const conversation = event.conversation!;
       setSelectedId(conversation.id);
-      setConversations(prevConversations => [conversation, ...prevConversations]);
+      setConversations((prevConversations) => [
+        conversation,
+        ...prevConversations,
+      ]);
 
       if (scrollContainerRef.current) {
         if ("scrollTop" in scrollContainerRef.current) {
           scrollContainerRef.current.scrollTop = 0;
         }
       }
-    } else if (event.action === 'edit') {
+    } else if (event.action === "edit") {
       if (event.id === 0) {
         console.error("invali state, cannot edit id = 0");
       } else {
-        setConversations(prevConversations => prevConversations.map(conv => {
-          if (conv.id === event.id && event.conversation) {
-            return event.conversation;
-          }
-          return conv;
-        }));
+        setConversations((prevConversations) =>
+          prevConversations.map((conv) => {
+            if (conv.id === event.id && event.conversation) {
+              return event.conversation;
+            }
+            return conv;
+          })
+        );
       }
-    } else if (event.action === 'delete') {
+    } else if (event.action === "delete") {
       if (event.id === 0) {
         loadConversations();
       } else {
-        setConversations(prevConversations => prevConversations.filter(conv => conv.id !== event.id));
+        setConversations((prevConversations) =>
+          prevConversations.filter((conv) => conv.id !== event.id)
+        );
       }
     }
   };
 
-
   const handleSearch = async (searchString: string) => {
-    if (!searchString || searchString.trim() === '') {
+    if (!searchString || searchString.trim() === "") {
       loadConversations();
       return;
     }
     searchString = searchString.trim();
     // Check if searchString starts with 'in:convo'
-    if (searchString.toLowerCase().startsWith('in:convo')) {
-      const actualSearchString = searchString.substring('in:convo'.length).trim();
-      if (actualSearchString === '') {
+    if (searchString.toLowerCase().startsWith("in:convo")) {
+      const actualSearchString = searchString
+        .substring("in:convo".length)
+        .trim();
+      if (actualSearchString === "") {
         // Handle the case where there might be no actual search term provided after 'in:convo'
         setConversations([]); // or however you wish to handle this case.
         return;
       }
       try {
-        const foundConversations = await ConversationService.searchWithinConversations(actualSearchString);
+        const foundConversations =
+          await ConversationService.searchWithinConversations(
+            actualSearchString
+          );
         // Assuming you do NOT want to modify the messages in this case, as you're searching within them
         setConversations(foundConversations);
       } catch (error) {
@@ -176,11 +193,14 @@ const ConversationList: React.FC = () => {
     } else {
       // Original search logic for searching by conversation title
       try {
-        const foundConversations = await ConversationService.searchConversationsByTitle(searchString);
-        const modifiedConversations = foundConversations.map(conversation => ({
-          ...conversation,
-          messages: "[]" // Assuming overwriting messages or handling differently was intentional
-        }));
+        const foundConversations =
+          await ConversationService.searchConversationsByTitle(searchString);
+        const modifiedConversations = foundConversations.map(
+          (conversation) => ({
+            ...conversation,
+            messages: "[]", // Assuming overwriting messages or handling differently was intentional
+          })
+        );
         setConversations(modifiedConversations);
       } catch (error) {
         console.error("Error during title search:", error);
@@ -214,25 +234,48 @@ const ConversationList: React.FC = () => {
 
   return (
     <div className="conversation-list-container">
-      <div id="conversation-search" className="flex flex-row items-center mb-2 relative">
+      <div
+        id="conversation-search"
+        className="flex flex-row items-center mb-2 relative"
+      >
+        {/* <button
+          className="flex px-3 h-[2rem] py-2 items-center gap-3
+                               transition-colors duration-200 dark:text-white
+                               cursor-pointer text-sm rounded-md border dark:border-white/20 hover:bg-gray-500/10
+                               bg-white dark:bg-transparent overflow-hidden"
+          onClick={onNewChat}
+          type="button"
+        >
+          <PlusIcon {...iconProps} />
+          <span className="truncate">{t("new-chat")}</span>
+        </button> */}
         <input
           id="searchInput"
           className="grow rounded-md border dark:text-gray-100 dark:bg-gray-850 dark:border-white/20 px-2 py-1"
           type="text"
           autoComplete="off"
-          placeholder={t('search')}
+          placeholder={t("search")}
           value={searchInputValue}
           onFocus={() => setShowSearchOptions(true)}
           onBlur={() => setTimeout(() => setShowSearchOptions(false), 200)} // Delay to allow click event to fire on the options
-          onChange={(e) => setSearchInputValue(e.target.value)}
-          onKeyPress={(e) => {
-            if (e.key === 'Enter') {
+          onChange={(e) => {
+            setSearchInputValue(e.target.value);
+            handleSearch(e.target.value);
+          }}
+          onKeyDown={(e) => {
+            console.log(e.key);
+            if (e.key === "Enter") {
               handleSearch(searchInputValue);
               setShowSearchOptions(false);
             }
+            if (e.key === "Escape") {
+              setSearchInputValue("");
+              handleSearch("");
+              // setShowSearchOptions(false);
+            }
           }}
         />
-        <button
+        {/* <button
           className="ml-2 rounded-md border dark:border-white/20 p-1"
           onClick={() => {
             handleSearch(searchInputValue);
@@ -242,7 +285,7 @@ const ConversationList: React.FC = () => {
           <MagnifyingGlassIcon
               style={{ color: userSettings.theme === 'dark' ? '#FFFFFF' : '#000000' }}
               {...iconProps} />
-        </button>
+        </button> */}
         {/* {
                     showSearchOptions && (
                       <SearchOptionsPopdown
@@ -253,35 +296,38 @@ const ConversationList: React.FC = () => {
                     )
       }*/}
       </div>
-      <div id="conversation-list" ref={scrollContainerRef}
-           className="flex-col flex-1 transition-opacity duration-500 -mr-2 pr-2 overflow-y-auto">
+      <div
+        id="conversation-list"
+        ref={scrollContainerRef}
+        className="flex-col flex-1 transition-opacity duration-500 -mr-2 pr-2 overflow-y-auto"
+      >
         <div className="flex flex-col gap-2 pb-2 dark:text-gray-100 text-gray-800 text-sm">
-          <div className="relative overflow-x-hidden" style={{height: "auto", opacity: 1}}>
+          <div
+            className="relative overflow-x-hidden"
+            style={{ height: "auto", opacity: 1 }}
+          >
             <ol>
-              {
-                conversationsWithMarkers.map((convo, index) => {
-                  if ("marker" in convo) {
-                    return (
-                      <li key={`marker-${index}`}
-                          className="sticky top-0 z-16">
-                        <h3
-                          className="h-9 pb-2 pt-3 px-3 text-xs text-gray-500 font-medium text-ellipsis overflow-hidden bg-gray-50 dark:bg-gray-900">
-                          {convo.title}
-                        </h3>
-                      </li>
-                    );
-                  } else {
-                    return (
-                      <ConversationListItemMemo
-                        key={convo.id}
-                        convo={convo}
-                        isSelected={selectedId === convo.id}
-                        loadConversations={loadConversations}
-                        setSelectedId={setSelectedId}
-                      />
-                    );
-                  }
-                })}
+              {conversationsWithMarkers.map((convo, index) => {
+                if ("marker" in convo) {
+                  return (
+                    <li key={`marker-${index}`} className="sticky top-0 z-16">
+                      <h3 className="h-9 pb-2 pt-3 px-3 text-xs text-gray-500 font-medium text-ellipsis overflow-hidden bg-gray-50 dark:bg-gray-900">
+                        {convo.title}
+                      </h3>
+                    </li>
+                  );
+                } else {
+                  return (
+                    <ConversationListItemMemo
+                      key={convo.id}
+                      convo={convo}
+                      isSelected={selectedId === convo.id}
+                      loadConversations={loadConversations}
+                      setSelectedId={setSelectedId}
+                    />
+                  );
+                }
+              })}
             </ol>
           </div>
         </div>
