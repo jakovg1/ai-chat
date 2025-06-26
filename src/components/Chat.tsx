@@ -112,7 +112,7 @@ const Chat: React.FC<Props> = ({
             !(conversation === null) ? "border-b border-black/10" : ""
           }`}
         >
-          <div className="flex items-center flex-row gap-1">
+          {/* <div className="flex items-center flex-row gap-1">
             {!conversation ? (
               ""
             ) : (
@@ -132,13 +132,7 @@ const Chat: React.FC<Props> = ({
                     fontSize: "0.85rem",
                     color: "#6b7280",
                   }}
-                >
-                  {/* <InformationCircleIcon
-                    width={20}
-                    height={20}
-                    stroke={"currentColor"}
-                  /> */}
-                </span>
+                ></span>
               </Tooltip>
             )}
             <span
@@ -198,7 +192,10 @@ const Chat: React.FC<Props> = ({
                 />
               </span>
             )}
-          </div>
+          </div> */}
+          {chatBlocks.length === 0 && (
+            <div className="initial-greeting ">Whats on your mind?</div>
+          )}
         </div>
         {chatBlocks.map((block, index) => (
           // <p>FOO CHAT BLOK</p>

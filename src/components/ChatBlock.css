@@ -1,0 +1,41 @@
+.chatblock-container {
+  width: 80%;
+  display: flex;
+  justify-content: flex-end;
+}
+.assistant-chatblock {
+  /* justify-content: flex-start; */
+  background-color: #222323 !important;
+  margin-right: 30%;
+  margin-left: 5%;
+  /* width: 50%; */
+  border-radius: 12px;
+  margin-bottom: 2rem;
+}
+
+.user-chatblock {
+  /* justify-content: flex-end; */
+  /* margin-left: 20vw; */
+  background-color: #343636 !important;
+  padding: 12px 0px;
+  margin-left: 30%;
+  margin-right: 5%;
+  /* background-color: red !important; */
+  /* width: 50%; */
+  border-radius: 12px;
+  margin-bottom: 4rem;
+}
+
+.initial-greeting {
+  display: block;
+  /* background-color: red; */
+  color: #757575;
+  font-size: 3rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  height: 70vh;
+
+  /* transition: 0.5s ease-in-out; */
+}
